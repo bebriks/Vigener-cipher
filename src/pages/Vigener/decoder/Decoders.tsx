@@ -57,6 +57,15 @@ const VigenereCipher: React.FC = () => {
     return result;
   };
 
+  const normalizeInput = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement >, field: string) => {
+    const value = e.target.value
+      .toUpperCase()
+      .replace(/[^А-ЯЁ]/gi, '')
+      .replace(/Ё/g, 'Е');
+    
+    form.setFieldsValue({ [field]: value });
+  };
+
   const vigenereDecode = (text: string, key: string): string => {
     let result = '';
     let keyIndex = 0;
@@ -77,6 +86,9 @@ const VigenereCipher: React.FC = () => {
     return result;
   };
 
+  const groupText = (text: string) => 
+    text.match(/.{1,5}/g)?.join(' ') || '';
+
   return (
     <div style={{ width: '100%', margin: '0 auto' }}>
       <Card title="Шифр Виженера">
@@ -96,17 +108,33 @@ const VigenereCipher: React.FC = () => {
           <Form.Item
             label={mode === 'encode' ? 'Исходный текст' : 'Зашифрованный текст'}
             name="text"
-            rules={[{ required: true, message: 'Введите текст' }]}
+            rules={[
+              { required: true, message: 'Введите текст' },
+              { pattern: /^[А-ЯЁ]+$/, message: 'Только русские буквы' }
+            ]}
           >
-            <Input.TextArea rows={4} />
+            <Input.TextArea
+              rows={4}
+              placeholder="Введите текст на русском языке"
+              onChange={(e) => normalizeInput(e, 'text')}
+              autoComplete="off"
+              spellCheck={false}
+            />
           </Form.Item>
 
           <Form.Item
             label="Ключ"
             name="key"
-            rules={[{ required: true, message: 'Введите ключ' }]}
+            rules={[
+              { required: true, message: 'Введите ключ' },
+              { pattern: /^[А-ЯЁ]+$/, message: 'Только русские буквы' }
+            ]}
           >
-            <Input />
+            <Input 
+              placeholder="Введите текст на русском языке"
+              onChange={(e) => normalizeInput(e, 'key')}
+              autoComplete="off"
+              spellCheck={false} />
           </Form.Item>
 
           <Form.Item>
@@ -123,7 +151,7 @@ const VigenereCipher: React.FC = () => {
             <Divider />
             <h3>Результат:</h3>
             <Card variant={'borderless'} style={{ background: '#f0f0f0' }}>
-              {result}
+              {groupText(result)}
             </Card>
             <Button 
               onClick={() => navigator.clipboard.writeText(result)}
