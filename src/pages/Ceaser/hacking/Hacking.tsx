@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button, Input, Alert, Radio, Card, Form } from 'antd';
-import { crack, processText, decrypt } from '../../../utils/cipher';
+import { crack, decrypt, processTextCrack } from '../../../utils/cipher';
 
 const { TextArea } = Input;
 
@@ -11,7 +11,7 @@ export const CrackCipher = () => {
   const [isCyrillic, setIsCyrillic] = useState(true);
 
   const handleCrack = () => {
-    const cleaned = processText(input, isCyrillic);
+    const cleaned = processTextCrack(input, isCyrillic);
 
     if(cleaned.length === 0) {
       setResult('')
@@ -21,7 +21,7 @@ export const CrackCipher = () => {
     
     const guessedKey = crack(cleaned, isCyrillic);
     console.log(guessedKey)
-    const decrypted = decrypt(cleaned, guessedKey, isCyrillic);
+    const decrypted = decrypt(cleaned, guessedKey);
     setError(null)
     setResult([
       `Определенный ключ: ${guessedKey}`,
