@@ -1,23 +1,22 @@
 import { useEffect, useState } from 'react';
-import { Button, Input, Radio, Card, Form, Space, Divider, RadioChangeEvent } from 'antd';
-import { processText, encrypt, decrypt, adjustKey } from '../../../utils/cipher';
+import { Button, Input, Radio, Card, Form, Space, Divider, type RadioChangeEvent, message } from 'antd';
+import { processText, encrypt, decrypt } from '../../../utils/cipher';
 
 const { TextArea } = Input;
 
 export const EncryptDecrypt = () => {
-  const [input, setInput] = useState('')
-  const [output, setOutput] = useState('')
-  const [key, setKey] = useState<number>(0)
-  const [mode, setMode] = useState<'encode' | 'decode'>('encode')
+  const [input, setInput] = useState('');
+  const [output, setOutput] = useState('');
+  const [key, setKey] = useState<number>(0);
+  const [mode, setMode] = useState<'encode' | 'decode'>('encode');
   const [error, setError] = useState<string>('')
-  const [maxKey, setMaxKey] = useState(32)
-  const [hasValidChars, setHasValidChars] = useState(false)
-  const [hasCyrillic, setHasCyrillic] = useState(false)
+  const [maxKey, setMaxKey] = useState(32);
+  const [hasValidChars, setHasValidChars] = useState(false);
 
   useEffect(() => {
     const cleaned = processText(input);
     const hasChars = cleaned.length > 0;
-    setHasCyrillic(/[а-я]/.test(cleaned))
+    const hasCyrillic = /[а-я]/.test(cleaned);
     
     setHasValidChars(hasChars);
     setMaxKey(hasCyrillic ? 32 : 26);
@@ -25,10 +24,10 @@ export const EncryptDecrypt = () => {
   }, [input]);
 
   const handleProcess = () => {
+    setInput('');
+    setOutput('');
+    setError('');
     setKey(0)
-    setInput('')
-    setOutput('')
-    setError('')
   };
 
   const handleModeChange = (e: RadioChangeEvent) => {
@@ -56,15 +55,14 @@ export const EncryptDecrypt = () => {
 
     try {
       const cleaned = processText(input);
-      const adjustedKey = adjustKey(key, hasCyrillic);
       const result = action === 'encrypt' 
-        ? encrypt(cleaned, adjustedKey)
-        : decrypt(cleaned, adjustedKey);
+        ? encrypt(cleaned, key)
+        : decrypt(cleaned, key);
       
       setOutput(groupText(result));
       setError('');
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Ошибка обработки текста');
+      setError(`Ошибка обработки текста ${e}`);
     }
   };
 
@@ -95,7 +93,7 @@ export const EncryptDecrypt = () => {
           </Form.Item>
 
           <Form.Item
-            label={`Ключ шифрования (0-${maxKey})`}
+            label={`Ключ шифрования целое число (от ${-maxKey} до ${maxKey})`}
             validateStatus={error ? 'error' : ''}
           >
             <Input 
@@ -112,14 +110,25 @@ export const EncryptDecrypt = () => {
                 setError('');
               }}
               onKeyDown={(e) => {
-                if (!/[-0-9]/.test(e.key) && 
-                  e.key !== 'Backspace' && 
-                  e.key !== 'Delete' &&
-                  e.key !== 'Tab' &&
-                  e.key !== 'ArrowLeft' &&
-                  e.key !== 'ArrowRight'
+               const allowedKeys = [
+                  'Backspace', 'Delete', 'Tab', 
+                  'ArrowLeft', 'ArrowRight', 'Home', 'End'
+                ];
+                
+                const charCode = e.key.charCodeAt(0);
+                const isDigit = charCode >= 48 && charCode <= 57;
+                const isMinus = charCode === 45;
+                
+                if (
+                  !allowedKeys.includes(e.key) && 
+                  !isDigit && 
+                  !isMinus
                 ) {
                   e.preventDefault();
+                  setError('Можно вводить только цифры и знак минуса');
+                  message.warning('Допустимы только целые числа и знак минуса');
+                } else {
+                  setError('');
                 }
               }}
             />

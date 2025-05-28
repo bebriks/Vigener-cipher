@@ -10,6 +10,12 @@ export const CrackCipher = () => {
   const [error, setError] = useState<string | null>(null);
   const [isCyrillic, setIsCyrillic] = useState(true);
 
+  const handleProcess = () => {
+    setInput('');
+    setError(null);
+    setResult('')
+  };
+
   const handleCrack = () => {
     const cleaned = processTextCrack(input, isCyrillic);
 
@@ -20,7 +26,6 @@ export const CrackCipher = () => {
     }
     
     const guessedKey = crack(cleaned, isCyrillic);
-    console.log(guessedKey)
     const decrypted = decrypt(cleaned, guessedKey);
     setError(null)
     setResult([
@@ -28,6 +33,7 @@ export const CrackCipher = () => {
       `Расшифрованный текст: ${groupText(decrypted)}`
     ].join('\n'));
   };
+
   const groupText = (text: string) => 
     text.match(/.{1,5}/g)?.join(' ') || '';
 
@@ -45,7 +51,8 @@ export const CrackCipher = () => {
         </Form.Item>
         <Form.Item
           label='Зашифрованный текст'
-          name="text"
+          validateStatus={error ? 'error' : ''}
+          help={error}
         >
             <TextArea
                 value={input}
@@ -54,11 +61,11 @@ export const CrackCipher = () => {
                 placeholder="Введите зашифрованный текст..."
             />
       </Form.Item>
-
+      <Button onClick={handleProcess}>Очистить</Button>
       <Button 
         onClick={handleCrack} 
         type="primary" 
-        style={{ margin: '10px 0' }}
+        style={{ margin: '10px 10px' }}
       >
         Взломать
       </Button>

@@ -22,21 +22,25 @@ export const adjustKey = (key: number, isCyrillic?: boolean): number => {
   return ((key % max) + max) % max;
 };
 
-const cipher = (text: string, key: number, encrypt: boolean): string => {
+export const cipher = (text: string, key: number, encrypt: boolean): string => {
   return text.split('').map(c => {
-    // Определение алфавита для каждого символа
     const isCyrillic = /[а-я]/.test(c);
+    //key = adjustKey(key, isCyrillic)
+    //const isLatinic = /[a-z]/.test(c);
+    
+    if (!/[а-яa-z]/.test(c)) return c;
+
     const alphabetSize = isCyrillic ? 32 : 26;
     const baseCharCode = isCyrillic ? 1072 : 97;
     const direction = encrypt ? 1 : -1;
 
+    const normalizedShift = ((key * direction % alphabetSize) + alphabetSize) % alphabetSize;
     const code = c.charCodeAt(0) - baseCharCode;
-    if (code < 0 || code >= alphabetSize) return c;
-    
-    const shifted = (code + (key * direction) + alphabetSize) % alphabetSize;
+    const shifted = (code + normalizedShift) % alphabetSize;
     return String.fromCharCode(shifted + baseCharCode);
   }).join('');
 };
+
 export const encrypt = (text: string, key: number): string => {
   return cipher(text, key, true);
 };
