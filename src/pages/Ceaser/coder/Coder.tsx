@@ -10,7 +10,6 @@ export const EncryptDecrypt = () => {
   const [key, setKey] = useState<number>(0);
   const [mode, setMode] = useState<'encode' | 'decode'>('encode');
   const [error, setError] = useState<string>('')
-  const [maxKey, setMaxKey] = useState(32);
   const [hasValidChars, setHasValidChars] = useState(false);
 
   useEffect(() => {
@@ -19,7 +18,7 @@ export const EncryptDecrypt = () => {
     const hasCyrillic = /[а-я]/.test(cleaned);
     
     setHasValidChars(hasChars);
-    setMaxKey(hasCyrillic ? 32 : 26);
+    //setMaxKey(hasCyrillic ? 32 : 26);
     setError(hasChars ? '' : 'Текст должен содержать буквы кириллицы или латиницы');
   }, [input]);
 
@@ -36,7 +35,6 @@ export const EncryptDecrypt = () => {
   };
 
   const validateKey = (value: number): string => {
-    if (value < -maxKey || value > maxKey) return `Ключ должен быть от ${-maxKey} до ${maxKey}`;
     if (isNaN(value)) return 'Введите числовое значение';
     return '';
   };
@@ -93,20 +91,14 @@ export const EncryptDecrypt = () => {
           </Form.Item>
 
           <Form.Item
-            label={`Ключ шифрования целое число (от ${-maxKey} до ${maxKey})`}
+            label={`Ключ шифрования любое целое число`}
             validateStatus={error ? 'error' : ''}
           >
             <Input 
               type="number"
-              min={-maxKey}
-              max={maxKey}
               value={key}
               onChange={e => {
-                const value = Math.max(
-                  Math.min(Number(e.target.value), maxKey),
-                  -maxKey
-                )
-                setKey(Number.isNaN(value) ? 0 : value)
+                setKey(Number.isNaN(e.target.value) ? 0 : e.target.value)
                 setError('');
               }}
               onKeyDown={(e) => {
