@@ -18,7 +18,6 @@ export const EncryptDecrypt = () => {
     const hasCyrillic = /[а-я]/.test(cleaned);
     
     setHasValidChars(hasChars);
-    //setMaxKey(hasCyrillic ? 32 : 26);
     setError(hasChars ? '' : 'Текст должен содержать буквы кириллицы или латиницы');
   }, [input]);
 
